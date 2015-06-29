@@ -3,37 +3,22 @@
  */
 
 var NAMEIFY = (function (NAMEIFY) {
-	"use strict";
 	function createLanguage() {
 		var that = {},
 			currentState,
-			vowels = "aaaeeeiiiooouuyy",
-			fricatives = "rsfhvnmz",
-			plosive = "tpdgkbc",
-			weird = "qwjx";
+			vowels = "",
+			fricatives = "",
+			plosive = "",
+			weird = "";
 
 		function selectRandomState() {
 			var randValue = Math.random();
 
-			if (randValue < .25) {
+			if (randValue < .3) {
 				return vowels;
-			} else if (randValue < .5) {
+			} else if (randValue < .4) {
 				return fricatives;
-			} else if (randValue < .85) {
-				return plosive;
-			} else {
-				return weird;
-			}
-		}
-
-		function selectStateWithChances(vowelChance, frictiveChance, plosiveChance) {
-			var randValue = Math.random();
-
-			if (randValue < vowelChance) {
-				return vowels;
-			} else if (randValue < frictiveChance) {
-				return fricatives;
-			} else if (randValue < plosiveChance) {
+			} else if (randValue < .7) {
 				return plosive;
 			} else {
 				return weird;
@@ -41,28 +26,54 @@ var NAMEIFY = (function (NAMEIFY) {
 		}
 
 		function randomLetterFromState(state) {
-			return state.charAt(Math.floor(Math.random() * state.length));
+			return state[Math.floor(Math.random() * state.length)];
 		}
 
 		function generateName(length) {
-			var name = "";
+			var name = "",
+				prime = false;
 			currentState = selectRandomState();
 
 			while (name.length < length) {
 				name = name.concat(randomLetterFromState(currentState));
 
+				var randValue = Math.random();
 				switch (currentState) {
 					case vowels:
-						currentState = selectStateWithChances(.1, .4, .7);
+						if (!prime && randValue < .1) {
+							currentState = vowels;
+							prime = true;
+							break;
+						} else if (randValue < .4) {
+							currentState = fricatives;
+						} else if (randValue < .7) {
+							currentState = plosive;
+						} else {
+							currentState = weird;
+						}
+						prime = false;
 						break;
 					case fricatives:
-						currentState = selectStateWithChances(.5, 0, 1);
+						if (!prime && randValue < .5) {
+							currentState = plosive;
+							prime = true;
+							break;
+						}
+						currentState = vowels;
+						prime = false;
 						break;
 					case plosive:
-						currentState = selectStateWithChances(.9, 1, 0);
+						if (!prime && randValue < .1) {
+							currentState = fricatives;
+							prime = true;
+							break;
+						}
+						currentState = vowels;
+						prime = false;
 						break;
 					case weird:
 						currentState = vowels;
+						prime = false;
 						break;
 				}
 			}
@@ -70,24 +81,24 @@ var NAMEIFY = (function (NAMEIFY) {
 			return name;
 		}
 
+
+
 		that.generateName = generateName;
 
-		that.vowels = vowels;
-		that.frictives = fricatives;
-		that.plosive = plosive;
-		that.weird = weird;
+		that.setVowels = function(value) { vowels = value; };
+		that.setFricatives = function(value) { fricatives = value; };
+		that.setPlosive = function(value) { plosive = value; };
+		that.setWeird = function(value) { weird = value; };
+
+		that.getVowels = function() { return vowels; };
+		that.getFricatives = function() { return fricatives; };
+		that.getPlosive = function() { return plosive; };
+		that.getWeird = function() { return weird; };
 
 		return that;
 	}
 
 	NAMEIFY.createLanguage = createLanguage;
-
-	var lang = createLanguage();
-
-
-	for (var n = 0, nMax = 40; n < nMax; n++) {
-		console.log(lang.generateName(8));
-	}
 
 	return NAMEIFY;
 }(NAMEIFY || {}));
